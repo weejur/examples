@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Built From My Phone</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --fg: #f0ece4;
+      --accent: #ff5c00;
+      --accent2: #00e5c0;
+      --muted: #3a3a3a;
+      --card: #141414;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Space Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grain overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .hero-inner {
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.6s ease 0.2s forwards;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.8rem, 10vw, 6rem);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.35s forwards;
+    }
+
+    h1 em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    /* Prompt card */
+    .prompt-card {
+      background: var(--card);
+      border: 1px solid var(--muted);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      position: relative;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.5s forwards;
+    }
+
+    .prompt-card::before {
+      content: 'THE EXACT PROMPT';
+      position: absolute;
+      top: -0.6em;
+      left: 1rem;
+      background: var(--bg);
+      padding: 0 0.5rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .prompt-text {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--fg);
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+    }
+
+    .prompt-cursor {
+      display: inline-block;
+      width: 0.6em;
+      height: 1.1em;
+      background: var(--accent2);
+      margin-left: 3px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* Stats row */
+    .stats {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeUp 0.7s ease 0.65s forwards;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--accent2);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #888;
+    }
+
+    /* Steps */
+    .steps-section {
+      padding: 4rem 2rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 2rem;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 3rem 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .step.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .step-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--muted);
+      line-height: 1;
+      padding-top: 0.1rem;
+    }
+
+    .step-content h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .step-content p {
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: #999;
+    }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--muted);
+      margin: 0 2rem;
+    }
+
+    /* Footer */
+    footer {
+      padding: 3rem 2rem;
+      max-width: 700px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-note {
+      font-size: 0.72rem;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .footer-note span {
+      color: var(--accent2);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #1a1a1a;
+      border: 1px solid var(--muted);
+      border-radius: 999px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: #aaa;
+      text-transform: uppercase;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Decorative top-right element */
+    .corner-deco {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      animation: fadeIn 1s ease 1s forwards;
+    }
+
+    .phone-icon {
+      font-size: 1.1rem;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    /* Scanline accent */
+    .hero::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+      opacity: 0.4;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="corner-deco">
+    <span class="phone-icon">📱</span>
+    <span class="badge"><span class="dot"></span>Live</span>
+  </div>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">A meta experiment · 2026</p>
+      <h1>A website<br/>built <em>entirely</em><br/>from a phone.</h1>
+
+      <div class="prompt-card">
+        <p class="prompt-text">
+          Hi Claude, I want to make a meta website that shows how it's possible make a website entirely from your phone using an LLM. Can you make me a webpage that includes this literal prompt?<span class="prompt-cursor"></span>
+        </p>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-num">1</span>
+          <span class="stat-label">Prompt sent</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">0</span>
+          <span class="stat-label">Lines coded by hand</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">∞</span>
+          <span class="stat-label">What's possible</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider"/>
+
+  <section class="steps-section">
+    <p class="section-label">How this was made</p>
+
+    <div class="step">
+      <span class="step-num">01</span>
+      <div class="step-content">
+        <h3>Open Claude on your phone</h3>
+        <p>No laptop. No IDE. No special setup. Just the Claude app or claude.ai in a mobile browser.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">02</span>
+      <div class="step-content">
+        <h3>Type a single prompt</h3>
+        <p>The exact prompt you see above — typed in plain English, no technical knowledge required.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">03</span>
+      <div class="step-content">
+        <h3>Copy the HTML</h3>
+        <p>Claude generates a complete, styled webpage. Copy the code directly from the chat.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-num">04</span>
+      <div class="step-content">
+        <h3>Paste &amp; publish on weejur</h3>
+        <p>Head to <a href="https://weejur.com" style="color:var(--accent2);text-decoration:none;">weejur.com</a>, paste your HTML, and hit publish. Your site goes live on GitHub Pages in seconds — for free.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider"/>
+
+  <footer>
+    <p class="footer-note">
+      Generated by <span>Claude</span> · No code written by hand<br/>
+      The future of building is conversational.
+    </p>
+    <div class="badge">
+      <span class="dot"></span>
+      Made on a phone
+    </div>
+  </footer>
+
+  <script>
+    // Scroll-triggered step reveals
+    const steps = document.querySelectorAll('.step');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 120);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    steps.forEach(s => observer.observe(s));
+  </script>
+</body>
+</html>
