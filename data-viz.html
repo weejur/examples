@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Voyager — An Interactive Exploration</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a28;
+    --border: #2a2a3d;
+    --text: #e8e6f0;
+    --text-dim: #8a879e;
+    --accent: #6ee7b7;
+    --accent2: #818cf8;
+    --accent3: #fb923c;
+    --accent4: #f472b6;
+    --accent5: #38bdf8;
+    --danger: #ef4444;
+    --serif: 'DM Serif Display', serif;
+    --sans: 'Outfit', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 600px 400px at 30% 40%, rgba(110,231,183,0.08), transparent),
+      radial-gradient(ellipse 500px 500px at 70% 60%, rgba(129,140,248,0.06), transparent),
+      radial-gradient(ellipse 400px 300px at 50% 80%, rgba(251,146,60,0.05), transparent);
+    pointer-events: none;
+  }
+
+  .hero canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.4;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    animation: fadeUp 1.2s ease-out;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+
+  .hero p {
+    font-size: 1.15rem;
+    color: var(--text-dim);
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    font-weight: 300;
+  }
+
+  .hero-nav {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .hero-nav a {
+    padding: 0.65rem 1.5rem;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s;
+    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .hero-nav a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 20px rgba(110,231,183,0.15);
+    transform: translateY(-2px);
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-title {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: 0.75rem;
+  }
+
+  .section-desc {
+    color: var(--text-dim);
+    max-width: 600px;
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+  }
+
+  /* ── CHART CONTAINERS ── */
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .chart-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+    opacity: 0.5;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-header h3 {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+  }
+
+  .chart-header .stat {
+    text-align: right;
+    font-family: var(--mono);
+  }
+
+  .chart-header .stat .value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .chart-header .stat .label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── SVG CHARTS ── */
+  svg.chart {
+    width: 100%;
+    overflow: visible;
+  }
+
+  svg text {
+    font-family: var(--sans);
+    fill: var(--text-dim);
+  }
+
+  /* ── CONTROLS ── */
+  .controls {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .controls button {
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.45rem 1rem;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .controls button:hover { border-color: var(--text-dim); color: var(--text); }
+  .controls button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  /* ── SLIDER ── */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .slider-row label {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    flex: 1;
+    min-width: 150px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(110,231,183,0.4);
+  }
+
+  .year-display {
+    font-family: var(--mono);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 4ch;
+  }
+
+  /* ── TOOLTIP ── */
+  .tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-size: 0.8rem;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.15s;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    max-width: 260px;
+  }
+
+  .tooltip.show { opacity: 1; }
+  .tooltip .tt-title { font-weight: 600; margin-bottom: 0.25rem; color: var(--text); }
+  .tooltip .tt-value { font-family: var(--mono); color: var(--accent); }
+
+  /* ── PLANET EXPLORER ── */
+  .planet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .planet-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .planet-card:hover, .planet-card.selected {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(110,231,183,0.1);
+  }
+
+  .planet-card .orb {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin: 0 auto 0.7rem;
+    position: relative;
+  }
+
+  .planet-card .orb::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: inherit;
+    filter: blur(12px);
+    opacity: 0.4;
+  }
+
+  .planet-card .name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .planet-card .detail {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+  }
+
+  .planet-info {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .planet-info .info-item .info-label {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 0.25rem;
+  }
+
+  .planet-info .info-item .info-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  footer span { color: var(--accent); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    section { padding: 3rem 1rem; }
+    .chart-card { padding: 1.25rem; }
+    .planet-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+  }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    max-width: 1100px;
+    margin: 0 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  /* ── BAR RACE ── */
+  .bar-race-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.45rem;
+    height: 32px;
+  }
+
+  .bar-race-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    width: 72px;
+    text-align: right;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bar-race-bar {
+    height: 28px;
+    border-radius: 6px;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.4s;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--bg);
+    min-width: 40px;
+    white-space: nowrap;
+  }
+
+  .play-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.6rem 1.5rem;
+    border-radius: 100px;
+    border: none;
+    background: var(--accent);
+    color: var(--bg);
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .play-btn:hover {
+    box-shadow: 0 0 20px rgba(110,231,183,0.3);
+    transform: translateY(-1px);
+  }
+
+  /* ── TEMP ANOMALY HEATMAP ── */
+  .heatmap-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+
+  .heat-cell {
+    width: 7px;
+    height: 24px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  .heat-cell:hover { transform: scaleY(1.3); }
+
+  .heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+
+  .heatmap-legend .gradient-bar {
+    width: 120px;
+    height: 10px;
+    border-radius: 5px;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa, #fbbf24, #f97316, #ef4444);
+  }
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip"></div>
+
+<!-- HERO -->
+<div class="hero">
+  <canvas id="stars"></canvas>
+  <div class="hero-content">
+    <h1>Data Voyager</h1>
+    <p>An interactive journey through fascinating public datasets — from the planets to population growth to our warming world.</p>
+    <nav class="hero-nav">
+      <a href="#solar">Solar System</a>
+      <a href="#population">World Population</a>
+      <a href="#temperature">Climate Anomalies</a>
+      <a href="#energy">Global Energy</a>
+    </nav>
+  </div>
+</div>
+
+<!-- 1. SOLAR SYSTEM -->
+<div class="section-divider"></div>
+<section id="solar">
+  <div class="section-label">01 — Space</div>
+  <h2 class="section-title">Our Solar System</h2>
+  <p class="section-desc">Click any planet to explore. Sizes are proportional to each other (not to the Sun!). Data from NASA.</p>
+
+  <div class="planet-grid" id="planetGrid"></div>
+  <div class="planet-info" id="planetInfo">
+    <div class="info-item"><div class="info-label">Select a planet</div><div class="info-value" style="color:var(--text-dim)">Click above to explore</div></div>
+  </div>
+</section>
+
+<!-- 2. WORLD POPULATION BAR RACE -->
+<div class="section-divider"></div>
+<section id="population">
+  <div class="section-label">02 — Population</div>
+  <h2 class="section-title">The Population Race</h2>
+  <p class="section-desc">Watch the world's most populous countries shift rank from 1960 to 2024. Data from the World Bank.</p>
+
+  <div class="chart-card">
+    <div class="chart-header">
+      <h3>Top 10 Most Populous Countries</h3>
+      <div class="stat">
+        <div class="value" id="popYear">1960</div>
+        <div class="label">Year</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:1rem;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;">
+      <button class="play-btn" id="playBtn" onclick="togglePlay()">▶ Play</button>
+      <input type="range" id="popSlider" min="0" max="64" value="0" oninput="setPopYear(this.value)" style="flex:1;min-width:150px">
+    </div>
+    <div id="barRace"></div>
+  </div>
+</section>
+
+<!-- 3. TEMPERATURE ANOMALIES -->
+<div class="section-divider"></div>
+<section id="temperature">
+  <div class="section-label">03 — Climate</div>
+  <h2 class="section-title">A Warming World</h2>
+  <p class="section-desc">Global temperature anomaly relative to the 1951–1980 average, year by year. Each bar is one year. Data from NASA GISS.</p>
+
+  <div class="chart-card">
+    <div class="chart-header">
+      <h3>Temperature Anomaly Heatmap (1880–2024)</h3>
+      <div class="stat">
+        <div class="value" id="tempPeak">+1.29°C</div>
+        <div class="label">2024 Anomaly</div>
+      </div>
+    </div>
+    <div class="heatmap-grid" id="heatmap"></div>
+    <div class="heatmap-legend">
+      <span>−0.5°C</span>
+      <div class="gradient-bar"></div>
+      <span>+1.3°C</span>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-header">
+      <h3>Annual Mean Temperature Anomaly</h3>
+    </div>
+    <svg id="tempChart" class="chart" viewBox="0 0 1000 350"></svg>
+  </div>
+</section>
+
+<!-- 4. ENERGY MIX -->
+<div class="section-divider"></div>
+<section id="energy">
+  <div class="section-label">04 — Energy</div>
+  <h2 class="section-title">How We Power The World</h2>
+  <p class="section-desc">Global primary energy consumption by source. Watch the dramatic rise of renewables. Data from Our World in Data / Energy Institute.</p>
+
+  <div class="chart-card">
+    <div class="chart-header">
+      <h3>Global Energy Mix</h3>
+      <div class="stat">
+        <div class="value" id="energyYearDisplay">2023</div>
+        <div class="label">Year</div>
+      </div>
+    </div>
+    <div class="slider-row">
+      <label>Year</label>
+      <input type="range" id="energySlider" min="0" max="58" value="58" oninput="setEnergyYear(this.value)">
+      <span class="year-display" id="energySliderYear">2023</span>
+    </div>
+    <svg id="energyChart" class="chart" viewBox="0 0 1000 400"></svg>
+  </div>
+</section>
+
+<footer>
+  Built with ♥ by <span>Claude</span> — powered by public data from NASA, World Bank, NASA GISS &amp; Our World in Data.<br>
+  Entirely self-contained in a single HTML file.
+</footer>
+
+<script>
+// ════════════════════════════════════════════
+//  TOOLTIP
+// ════════════════════════════════════════════
+const tt = document.getElementById('tooltip');
+function showTooltip(e, title, value) {
+  tt.innerHTML = `<div class="tt-title">${title}</div><div class="tt-value">${value}</div>`;
+  tt.classList.add('show');
+  const x = Math.min(e.clientX + 12, window.innerWidth - 280);
+  const y = e.clientY - 60 < 0 ? e.clientY + 20 : e.clientY - 60;
+  tt.style.left = x + 'px';
+  tt.style.top = y + 'px';
+}
+function hideTooltip() { tt.classList.remove('show'); }
+
+// ════════════════════════════════════════════
+//  STARFIELD
+// ════════════════════════════════════════════
+(function() {
+  const c = document.getElementById('stars');
+  const ctx = c.getContext('2d');
+  let w, h, stars = [];
+  function resize() {
+    w = c.width = c.parentElement.offsetWidth;
+    h = c.height = c.parentElement.offsetHeight;
+    stars = Array.from({length: 200}, () => ({
+      x: Math.random() * w, y: Math.random() * h,
+      r: Math.random() * 1.5 + 0.3,
+      speed: Math.random() * 0.3 + 0.05,
+      flicker: Math.random() * Math.PI * 2
+    }));
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  function draw(t) {
+    ctx.clearRect(0, 0, w, h);
+    stars.forEach(s => {
+      const a = 0.4 + 0.6 * Math.sin(t * 0.001 + s.flicker);
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${a})`;
+      ctx.fill();
+      s.y -= s.speed;
+      if (s.y < -2) { s.y = h + 2; s.x = Math.random() * w; }
+    });
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+// ════════════════════════════════════════════
+//  1. SOLAR SYSTEM DATA
+// ════════════════════════════════════════════
+const planets = [
+  { name:'Mercury', color:'#b0a090', radius:2440, mass:'3.30×10²³ kg', dist:'57.9M km', day:'58.6 Earth days', year:'88 Earth days', moons:0, temp:'−180 to 430°C', desc:'Smallest planet, extreme temperature swings.' },
+  { name:'Venus', color:'#e8c86a', radius:6052, mass:'4.87×10²⁴ kg', dist:'108.2M km', day:'243 Earth days', year:'225 Earth days', moons:0, temp:'~465°C', desc:'Hottest planet, thick toxic atmosphere.' },
+  { name:'Earth', color:'#4a90d9', radius:6371, mass:'5.97×10²⁴ kg', dist:'149.6M km', day:'24 hours', year:'365.25 days', moons:1, temp:'−89 to 57°C', desc:'Our home, the only known world with life.' },
+  { name:'Mars', color:'#c1440e', radius:3390, mass:'6.42×10²³ kg', dist:'227.9M km', day:'24h 37m', year:'687 Earth days', moons:2, temp:'−140 to 20°C', desc:'The Red Planet, target for human exploration.' },
+  { name:'Jupiter', color:'#c8a56e', radius:69911, mass:'1.90×10²⁷ kg', dist:'778.5M km', day:'9h 56m', year:'11.9 Earth years', moons:95, temp:'−110°C', desc:'Largest planet, iconic Great Red Spot.' },
+  { name:'Saturn', color:'#e8d5a3', radius:58232, mass:'5.68×10²⁶ kg', dist:'1.43B km', day:'10h 42m', year:'29.4 Earth years', moons:146, temp:'−140°C', desc:'Famous for its stunning ring system.' },
+  { name:'Uranus', color:'#7ec8c8', radius:25362, mass:'8.68×10²⁵ kg', dist:'2.87B km', day:'17h 14m', year:'84 Earth years', moons:28, temp:'−195°C', desc:'Rotates on its side, icy giant.' },
+  { name:'Neptune', color:'#4a6ee0', radius:24622, mass:'1.02×10²⁶ kg', dist:'4.50B km', day:'16h 6m', year:'165 Earth years', moons:16, temp:'−200°C', desc:'Windiest planet, deep blue color.' },
+];
+
+const grid = document.getElementById('planetGrid');
+const info = document.getElementById('planetInfo');
+const maxR = Math.max(...planets.map(p=>p.radius));
+
+planets.forEach((p, i) => {
+  const size = Math.max(20, (p.radius / maxR) * 52);
+  const card = document.createElement('div');
+  card.className = 'planet-card';
+  card.innerHTML = `<div class="orb" style="width:${size}px;height:${size}px;background:radial-gradient(circle at 35% 35%,${p.color},${darken(p.color,40)})"></div><div class="name">${p.name}</div><div class="detail">${p.moons} moon${p.moons!==1?'s':''}</div>`;
+  card.onclick = () => selectPlanet(i);
+  grid.appendChild(card);
+});
+
+function darken(hex, amt) {
+  let r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `rgb(${Math.max(0,r-amt)},${Math.max(0,g-amt)},${Math.max(0,b-amt)})`;
+}
+
+function selectPlanet(i) {
+  document.querySelectorAll('.planet-card').forEach((c,j) => c.classList.toggle('selected', j===i));
+  const p = planets[i];
+  info.innerHTML = [
+    ['Radius', p.radius.toLocaleString() + ' km'],
+    ['Mass', p.mass],
+    ['Distance from Sun', p.dist],
+    ['Day Length', p.day],
+    ['Year Length', p.year],
+    ['Moons', p.moons],
+    ['Temperature', p.temp],
+    ['Fun Fact', p.desc],
+  ].map(([l,v]) => `<div class="info-item"><div class="info-label">${l}</div><div class="info-value">${v}</div></div>`).join('');
+}
+
+// ════════════════════════════════════════════
+//  2. POPULATION BAR RACE
+// ════════════════════════════════════════════
+const popData = {
+  years: Array.from({length:65}, (_,i) => 1960+i),
+  countries: ['China','India','USA','Indonesia','Brazil','Pakistan','Bangladesh','Nigeria','Russia','Japan','Mexico','Ethiopia','Philippines','Egypt','Germany','Vietnam','DRC','Turkey','Iran','UK'],
+  colors: ['#ef4444','#f97316','#3b82f6','#10b981','#22c55e','#14b8a6','#06b6d4','#8b5cf6','#6366f1','#ec4899','#f59e0b','#84cc16','#0ea5e9','#a855f7','#64748b','#e11d48','#7c3aed','#059669','#d97706','#475569'],
+  data: {}
+};
+
+// Realistic population data (millions) for key years, interpolated
+const keyPop = {
+  China:    {1960:667,1970:818,1980:981,1990:1135,2000:1263,2010:1338,2020:1411,2024:1425},
+  India:    {1960:449,1970:555,1980:698,1990:873,2000:1057,2010:1234,2020:1396,2024:1450},
+  USA:      {1960:180,1970:205,1980:227,1990:250,2000:282,2010:309,2020:331,2024:340},
+  Indonesia:{1960:88,1970:115,1980:148,1990:182,2000:212,2010:242,2020:271,2024:280},
+  Brazil:   {1960:72,1970:96,1980:122,1990:150,2000:175,2010:196,2020:213,2024:217},
+  Pakistan: {1960:45,1970:59,1980:80,1990:108,2000:142,2010:179,2020:221,2024:240},
+  Bangladesh:{1960:51,1970:66,1980:83,1990:106,2000:128,2010:148,2020:169,2024:175},
+  Nigeria:  {1960:45,1970:56,1980:73,1990:96,2000:122,2010:159,2020:206,2024:230},
+  Russia:   {1960:120,1970:130,1980:139,1990:148,2000:146,2010:143,2020:144,2024:143},
+  Japan:    {1960:93,1970:104,1980:117,1990:124,2000:127,2010:128,2020:126,2024:123},
+  Mexico:   {1960:38,1970:51,1980:68,1990:83,2000:98,2010:112,2020:129,2024:133},
+  Ethiopia: {1960:22,1970:29,1980:35,1990:48,2000:66,2010:87,2020:115,2024:130},
+  Philippines:{1960:27,1970:37,1980:48,1990:61,2000:78,2010:93,2020:109,2024:117},
+  Egypt:    {1960:27,1970:34,1980:43,1990:56,2000:68,2010:82,2020:102,2024:112},
+  Germany:  {1960:73,1970:78,1980:78,1990:79,2000:82,2010:82,2020:83,2024:84},
+  Vietnam:  {1960:33,1970:43,1980:54,1990:66,2000:78,2010:87,2020:97,2024:100},
+  DRC:      {1960:16,1970:21,1980:28,1990:37,2000:48,2010:66,2020:90,2024:105},
+  Turkey:   {1960:28,1970:35,1980:44,1990:53,2000:63,2010:73,2020:84,2024:86},
+  Iran:     {1960:22,1970:28,1980:39,1990:56,2000:65,2010:74,2020:84,2024:89},
+  UK:       {1960:52,1970:56,1980:56,1990:57,2000:59,2010:63,2020:67,2024:69},
+};
+
+// Interpolate
+function lerp(a,b,t){return a+(b-a)*t;}
+const keyYears = [1960,1970,1980,1990,2000,2010,2020,2024];
+popData.countries.forEach(c => {
+  popData.data[c] = popData.years.map(y => {
+    if (keyPop[c][y] !== undefined) return keyPop[c][y];
+    let lo = keyYears.filter(k=>k<=y).pop(), hi = keyYears.filter(k=>k>=y).shift();
+    if (!lo || !hi || lo===hi) return keyPop[c][lo||hi];
+    return Math.round(lerp(keyPop[c][lo], keyPop[c][hi], (y-lo)/(hi-lo)));
+  });
+});
+
+const barContainer = document.getElementById('barRace');
+let popIdx = 0, playing = false, playTimer = null;
+
+function renderBars(idx) {
+  const year = popData.years[idx];
+  document.getElementById('popYear').textContent = year;
+  document.getElementById('popSlider').value = idx;
+
+  let ranked = popData.countries.map((c, ci) => ({
+    name: c, val: popData.data[c][idx], color: popData.colors[ci]
+  })).sort((a,b)=>b.val-a.val).slice(0,10);
+
+  const maxVal = ranked[0].val;
+  barContainer.innerHTML = ranked.map(r => {
+    const pct = (r.val / maxVal * 85) + 5;
+    return `<div class="bar-race-row">
+      <div class="bar-race-label">${r.name}</div>
+      <div class="bar-race-bar" style="width:${pct}%;background:${r.color}"
+        onmouseenter="showTooltip(event,'${r.name} (${year})','${r.val.toLocaleString()}M')"
+        onmouseleave="hideTooltip()">${r.val.toLocaleString()}M</div>
+    </div>`;
+  }).join('');
+}
+
+function setPopYear(idx) { popIdx = +idx; renderBars(popIdx); }
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('playBtn').textContent = playing ? '⏸ Pause' : '▶ Play';
+  if (playing) {
+    if (popIdx >= 64) popIdx = 0;
+    playTimer = setInterval(() => {
+      popIdx++;
+      if (popIdx > 64) { popIdx = 64; togglePlay(); return; }
+      renderBars(popIdx);
+    }, 180);
+  } else {
+    clearInterval(playTimer);
+  }
+}
+renderBars(0);
+
+// ════════════════════════════════════════════
+//  3. TEMPERATURE ANOMALY (NASA GISS data)
+// ════════════════════════════════════════════
+const tempAnomaly = [
+  -0.16,-0.08,-0.10,-0.12,-0.22,-0.25,-0.21,-0.36,-0.27,-0.15,
+  -0.35,-0.30,-0.33,-0.31,-0.23,-0.11,-0.07,-0.21,-0.26,-0.29,
+  -0.27,-0.18,-0.26,-0.28,-0.32,-0.22,-0.11,-0.35,-0.43,-0.34,
+  -0.14,-0.15,-0.14,-0.21,-0.12,-0.19,-0.23,-0.21,-0.17,-0.21,
+  -0.07,-0.01,-0.06,-0.03,-0.12,-0.01,-0.04,0.01,-0.04,-0.06,
+  -0.17,-0.02,0.02,-0.02,-0.13,0.14,-0.13,-0.01,0.05,0.04,
+   0.02,0.07,0.02,0.05,-0.21,-0.11,-0.07,-0.01,-0.03,0.06,
+   0.02,-0.08,0.01,0.16,-0.07,-0.01,-0.10,0.18,0.07,0.17,
+   0.26,0.32,0.14,0.31,0.16,0.12,0.19,0.33,0.40,0.27,
+   0.45,0.41,0.22,0.24,0.31,0.45,0.33,0.46,0.61,0.39,
+   0.40,0.54,0.63,0.62,0.54,0.68,0.64,0.66,0.54,0.65,
+   0.72,0.61,0.65,0.68,0.75,0.90,1.01,0.92,0.85,0.98,
+   1.02,0.92,1.00,1.18,0.85,0.99,1.01,1.02,0.92,1.11,
+   0.95,0.82,0.90,1.17,1.29,1.09,0.98,0.86,1.05,1.17,
+   1.03,0.89,0.99,1.18,1.29
+];
+const tempYears = Array.from({length:tempAnomaly.length}, (_,i)=>1880+i);
+
+// Heatmap
+const heatmap = document.getElementById('heatmap');
+function tempColor(v) {
+  if (v < -0.2) return '#3b82f6';
+  if (v < 0) return '#60a5fa';
+  if (v < 0.3) return '#fbbf24';
+  if (v < 0.7) return '#f97316';
+  return '#ef4444';
+}
+
+tempAnomaly.forEach((v, i) => {
+  const cell = document.createElement('div');
+  cell.className = 'heat-cell';
+  cell.style.background = tempColor(v);
+  cell.onmouseenter = e => showTooltip(e, `${tempYears[i]}`, `${v >= 0 ? '+' : ''}${v.toFixed(2)}°C`);
+  cell.onmouseleave = hideTooltip;
+  heatmap.appendChild(cell);
+});
+
+// Line chart
+(function() {
+  const svg = document.getElementById('tempChart');
+  const W = 1000, H = 350, pad = {t:20,r:30,b:40,l:55};
+  const cW = W - pad.l - pad.r, cH = H - pad.t - pad.b;
+  const minV = -0.5, maxV = 1.4;
+
+  function xScale(i) { return pad.l + (i / (tempAnomaly.length - 1)) * cW; }
+  function yScale(v) { return pad.t + cH - ((v - minV) / (maxV - minV)) * cH; }
+
+  // Grid lines
+  let gridHTML = '';
+  for (let v = -0.5; v <= 1.4; v += 0.5) {
+    const y = yScale(v);
+    gridHTML += `<line x1="${pad.l}" x2="${W-pad.r}" y1="${y}" y2="${y}" stroke="${v===0?'rgba(255,255,255,0.15)':'rgba(255,255,255,0.05)'}" stroke-dasharray="${v===0?'':'4 4'}"/>`;
+    gridHTML += `<text x="${pad.l-10}" y="${y+4}" text-anchor="end" font-size="11">${v>=0?'+':''}${v.toFixed(1)}°C</text>`;
+  }
+
+  // X labels
+  for (let y = 1880; y <= 2020; y += 20) {
+    const i = y - 1880;
+    gridHTML += `<text x="${xScale(i)}" y="${H-8}" text-anchor="middle" font-size="11">${y}</text>`;
+  }
+
+  // Area + line
+  let pathD = '', areaD = `M${xScale(0)},${yScale(0)} `;
+  tempAnomaly.forEach((v, i) => {
+    const x = xScale(i), y = yScale(v);
+    pathD += (i===0?'M':'L') + `${x},${y} `;
+    areaD += `L${x},${y} `;
+  });
+  areaD += `L${xScale(tempAnomaly.length-1)},${yScale(0)} Z`;
+
+  // Dots for interaction
+  let dotsHTML = '';
+  tempAnomaly.forEach((v, i) => {
+    const x = xScale(i), y = yScale(v);
+    dotsHTML += `<circle cx="${x}" cy="${y}" r="4" fill="${v>=0?'var(--accent3)':'var(--accent5)'}" opacity="0" style="cursor:pointer"
+      onmouseenter="this.setAttribute('opacity','1');this.setAttribute('r','6');showTooltip(event,'${tempYears[i]}','${v>=0?'+':''}${v.toFixed(2)}°C')"
+      onmouseleave="this.setAttribute('opacity','0');this.setAttribute('r','4');hideTooltip()"/>`;
+  });
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="areaGrad" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="var(--accent3)" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="var(--accent3)" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    ${gridHTML}
+    <path d="${areaD}" fill="url(#areaGrad)"/>
+    <path d="${pathD}" fill="none" stroke="var(--accent3)" stroke-width="2"/>
+    ${dotsHTML}
+  `;
+})();
+
+// ════════════════════════════════════════════
+//  4. ENERGY MIX (stacked area)
+// ════════════════════════════════════════════
+const energySources = ['Coal','Oil','Gas','Nuclear','Hydro','Wind','Solar','Other Renewables'];
+const energyColors = ['#64748b','#854d0e','#d97706','#a855f7','#3b82f6','#06b6d4','#facc15','#22c55e'];
+
+// TWh — approximate global data 1965-2023
+const energyKeyData = {
+  // [Coal, Oil, Gas, Nuclear, Hydro, Wind, Solar, Other Renew] in TWh (×100 for storage, /100 to display)
+  1965: [154,152,63,1,10,0,0,2],
+  1975: [170,268,105,5,15,0,0,3],
+  1985: [217,276,146,15,20,0,0,4],
+  1995: [238,318,196,24,25,0,0,5],
+  2005: [302,389,256,27,29,1,0,6],
+  2010: [353,393,291,27,34,3,0.3,8],
+  2015: [391,420,321,26,39,8,2,10],
+  2020: [368,384,342,27,43,15,8,13],
+  2023: [395,416,368,28,44,22,14,16],
+};
+
+const eYears = Array.from({length:59}, (_,i) => 1965+i);
+const eKeyYearList = [1965,1975,1985,1995,2005,2010,2015,2020,2023];
+const energyFull = {};
+energySources.forEach((s, si) => {
+  energyFull[s] = eYears.map(y => {
+    const ky = eKeyYearList;
+    if (energyKeyData[y]) return energyKeyData[y][si];
+    let lo = ky.filter(k=>k<=y).pop(), hi = ky.filter(k=>k>=y).shift();
+    if (!lo || !hi || lo===hi) return energyKeyData[lo||hi][si];
+    return Math.round(lerp(energyKeyData[lo][si], energyKeyData[hi][si], (y-lo)/(hi-lo))*10)/10;
+  });
+});
+
+function drawEnergy(idx) {
+  const svg = document.getElementById('energyChart');
+  const year = eYears[idx];
+  document.getElementById('energyYearDisplay').textContent = year;
+  document.getElementById('energySliderYear').textContent = year;
+
+  const W=1000, H=400, pad={t:20,r:120,b:40,l:55};
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+
+  // Compute stacked
+  const stack = eYears.map((y,yi) => {
+    let cumul = 0;
+    return energySources.map((s,si) => {
+      const v = energyFull[s][yi];
+      cumul += v;
+      return cumul;
+    });
+  });
+
+  const maxY = Math.max(...stack.map(s => s[s.length-1]));
+  const xS = i => pad.l + (i / (eYears.length-1)) * cW;
+  const yS = v => pad.t + cH - (v/maxY)*cH;
+
+  let html = '';
+
+  // Grid
+  for (let v = 0; v <= maxY; v += 200) {
+    html += `<line x1="${pad.l}" x2="${W-pad.r}" y1="${yS(v)}" y2="${yS(v)}" stroke="rgba(255,255,255,0.05)"/>`;
+    html += `<text x="${pad.l-10}" y="${yS(v)+4}" text-anchor="end" font-size="11">${v}</text>`;
+  }
+  for (let y=1965;y<=2023;y+=10) {
+    html += `<text x="${xS(y-1965)}" y="${H-8}" text-anchor="middle" font-size="11">${y}</text>`;
+  }
+
+  // Areas (bottom to top)
+  for (let si = energySources.length-1; si >= 0; si--) {
+    let d = `M${xS(0)},${yS(0)} `;
+    for (let yi = 0; yi < eYears.length; yi++) d += `L${xS(yi)},${yS(stack[yi][si])} `;
+    for (let yi = eYears.length-1; yi >= 0; yi--) d += `L${xS(yi)},${yS(si>0?stack[yi][si-1]:0)} `;
+    d += 'Z';
+    html += `<path d="${d}" fill="${energyColors[si]}" opacity="0.75"/>`;
+  }
+
+  // Year indicator
+  const yi = idx;
+  html += `<line x1="${xS(yi)}" x2="${xS(yi)}" y1="${pad.t}" y2="${pad.t+cH}" stroke="var(--text)" stroke-width="1" stroke-dasharray="4 4" opacity="0.4"/>`;
+
+  // Legend
+  energySources.forEach((s, si) => {
+    const ly = pad.t + 10 + si * 22;
+    const val = energyFull[s][idx].toFixed(0);
+    html += `<rect x="${W-pad.r+14}" y="${ly}" width="12" height="12" rx="3" fill="${energyColors[si]}"/>`;
+    html += `<text x="${W-pad.r+32}" y="${ly+10}" font-size="11" fill="var(--text)">${s} <tspan fill="var(--text-dim)">${val}</tspan></text>`;
+  });
+
+  // Axis label
+  html += `<text x="${pad.l-10}" y="${pad.t-6}" font-size="11" fill="var(--text-dim)">TWh (×100)</text>`;
+
+  svg.innerHTML = html;
+}
+
+function setEnergyYear(idx) { drawEnergy(+idx); }
+drawEnergy(58);
+
+</script>
+</body>
+</html>
