@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paige Webb — Designer & Developer</title>
+  <meta name="description" content="Paige Webb is a designer and developer who builds things for the web.">
+  <meta property="og:title" content="Paige Webb — Designer & Developer">
+  <meta property="og:description" content="Designer and developer who builds things for the web.">
+  <meta name="twitter:card" content="summary">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #FFFAF5;
+      --text: #1a1a1a;
+      --text-muted: #6b6560;
+      --accent: #2B563B;
+      --accent-light: #D6E8DC;
+      --border: #e8e0d8;
+      --card-bg: #fff;
+      --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06);
+      --radius: 12px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* --- Header / Hero --- */
+
+    .hero {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 4rem 1.5rem 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .headshot {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--border);
+      margin-bottom: 1.5rem;
+      background: var(--accent-light);
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(2rem, 5vw, 2.75rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 0.5rem;
+    }
+
+    .tagline {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 440px;
+      margin-bottom: 1.25rem;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .social-links a {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color 0.15s;
+    }
+
+    .social-links a:hover {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* --- Sections --- */
+
+    .content {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    section {
+      margin-bottom: 3rem;
+    }
+
+    h2 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.01em;
+    }
+
+    .about p {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 520px;
+    }
+
+    .about p + p {
+      margin-top: 0.75rem;
+    }
+
+    /* --- Project Cards --- */
+
+    .project-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .project-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--card-shadow);
+      transition: box-shadow 0.2s, transform 0.2s;
+      display: block;
+      color: inherit;
+    }
+
+    .project-card:hover {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.09);
+      transform: translateY(-2px);
+      text-decoration: none;
+    }
+
+    .project-card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .project-card p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .project-card .tag {
+      display: inline-block;
+      margin-top: 0.6rem;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 0.2em 0.65em;
+      border-radius: 6px;
+    }
+
+    .project-card .tag + .tag {
+      margin-left: 0.35rem;
+    }
+
+    /* --- Writing --- */
+
+    .writing-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .writing-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 1rem;
+    }
+
+    .writing-list a {
+      font-weight: 500;
+      font-size: 1rem;
+    }
+
+    .writing-list .date {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* --- Footer --- */
+
+    footer {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* --- Responsive --- */
+
+    @media (max-width: 480px) {
+      .hero {
+        padding-top: 2.5rem;
+      }
+
+      .writing-list li {
+        flex-direction: column;
+        gap: 0.15rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <img class="headshot" src="paige_webb.png" alt="Paige Webb">
+
+    <h1>Paige Webb</h1>
+    <p class="tagline">This is a fake personal website, generated by Claude and published with <a href="https://weejur.com">weejur</a>. Paige is not real, but her website is!</p>
+
+    <nav class="social-links">
+      <a href="#">GitHub</a>
+      <a href="#">LinkedIn</a>
+      <a href="#">Bluesky</a>
+      <a href="#">Email</a>
+    </nav>
+  </header>
+
+  <main class="content">
+
+    <section class="about">
+      <h2>About</h2>
+      <p>
+        I'm a designer and front-end developer based in Portland, OR. I care about
+        accessible interfaces, clean markup, and making websites that load before
+        you finish blinking.
+      </p>
+      <p>
+        Currently working at <a href="#">Cache Flow Studio</a>, where I help small
+        businesses get online without the bloat. Previously at Lorem &amp; Ipsum and
+        a brief stint freelancing from a van in New Zealand, where the Wi-Fi was
+        terrible but the views compiled beautifully.
+      </p>
+    </section>
+
+    <section>
+      <h2>Projects</h2>
+      <div class="project-list">
+        <a class="project-card" href="#">
+          <h3>Flux Capacitor.js</h3>
+          <p>An open-source time machine built entirely in the browser. Currently only goes forward at normal speed.</p>
+          <span class="tag">JavaScript</span>
+          <span class="tag">Temporal Mechanics</span>
+        </a>
+        <a class="project-card" href="#">
+          <h3>Antigravity</h3>
+          <p>A CSS library that makes elements float off the page. Literally. We lost three divs last week.</p>
+          <span class="tag">CSS</span>
+          <span class="tag">Physics</span>
+        </a>
+        <a class="project-card" href="#">
+          <h3>Rosetta</h3>
+          <p>Universal translator for developer documentation. Converts any README into something a human can understand.</p>
+          <span class="tag">NLP</span>
+          <span class="tag">Wishful Thinking</span>
+        </a>
+        <a class="project-card" href="#">
+          <h3>Trail Mix</h3>
+          <p>A random hike generator that always picks trails with the best snack spots. Priorities.</p>
+          <span class="tag">Maps</span>
+          <span class="tag">Snacks</span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Writing</h2>
+      <ul class="writing-list">
+        <li>
+          <a href="#">Why I Mass-Deleted My Node Modules and Found Inner Peace</a>
+          <span class="date">Mar 2025</span>
+        </li>
+        <li>
+          <a href="#">I Taught My Houseplants to Deploy to Production</a>
+          <span class="date">Jan 2025</span>
+        </li>
+        <li>
+          <a href="#">Building a Website From My Phone</a>
+          <span class="date">Nov 2024</span>
+        </li>
+        <li>
+          <a href="#">The Case for Carrier Pigeons Over WebSockets</a>
+          <span class="date">Aug 2024</span>
+        </li>
+      </ul>
+    </section>
+
+  </main>
+
+  <footer>
+    This is a sample site published with <a href="https://weejur.com">weejur</a>. Paige Webb is fictional.
+  </footer>
+
+</body>
+</html>
